@@ -5,7 +5,8 @@
 
     android:id="@+id/arFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
 
     <TextView
         android:id="@+id/ar_tracking_status"
@@ -14,8 +15,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="8dp"
         android:text="Tracking: UNKNOWN"
-        android:textColor="@color/white"
-        android:background="@drawable/rounded_corners"
+        android:textColor="@color/text_primary_dark"
+        android:background="@drawable/rounded_corners_highlighted"
         android:elevation="2dp"
         android:padding="6dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -195,11 +196,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="12dp"
-        android:background="@drawable/rounded_corners"
+        android:background="@drawable/rounded_corners_highlighted"
         android:elevation="2dp"
         android:paddingVertical="8dp"
         android:textAlignment="center"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary_dark"
         android:textSize="14sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -211,7 +212,7 @@
         android:layout_height="wrap_content"
         android:text="Start"
         android:textColor="@color/white"
-        android:backgroundTint="@color/secondary"
+        android:backgroundTint="@color/accent_blue"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/ar_content_layout"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -224,7 +225,7 @@
         android:layout_height="wrap_content"
         android:text="Finish"
         android:textColor="@color/white"
-        android:backgroundTint="@color/secondary"
+        android:backgroundTint="@color/accent_blue"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/ar_content_layout"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -275,8 +276,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
-        android:background="@drawable/rounded_corners"
-        android:backgroundTint="@color/translucent"
+        android:background="@drawable/rounded_corners_highlighted"
+        android:backgroundTint="@color/surface_dark"
         android:elevation="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -297,20 +298,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_undo"
-                android:textColor="@color/white"
+                android:textColor="@color/accent_blue"
                 android:textSize="11sp"
                 app:icon="@drawable/ic_baseline_undo_24"
-                app:iconTint="@color/white" />
+                app:iconTint="@color/accent_blue" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/ar_button_clear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_clear"
-                android:textColor="@color/white"
+                android:textColor="@color/error_red"
                 android:textSize="11sp"
                 app:icon="@drawable/ic_baseline_delete_24"
-                app:iconTint="@color/white" />
+                app:iconTint="@color/error_red" />
         </LinearLayout>
 
 
@@ -319,7 +320,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
-            android:divider="@color/primaryLight"
+            android:divider="@color/divider_dark"
             android:orientation="vertical"
             android:padding="4dp"
             android:visibility="invisible"
@@ -383,11 +384,11 @@
             android:text="@string/button_resolve"
             android:textColor="@color/white"
             app:icon="@drawable/ic_baseline_cloud_download_24"
-            app:iconTint="@color/white"
+            app:iconTint="@color/accent_blue"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            tools:backgroundTint="@color/secondary" />
+            tools:backgroundTint="@color/accent_blue" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -462,7 +463,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:background="@color/black"
+        android:background="@color/accent_black"
         android:padding="8dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"

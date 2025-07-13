@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:background="@color/background_dark">
 
     <!-- Map at the top -->
     <FrameLayout
@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:background="@color/card_background_light"
+        android:background="@color/card_background_dark"
         android:padding="16dp"
         app:behavior_hideable="false"
         app:behavior_peekHeight="120dp"
@@ -49,7 +49,7 @@
             android:text="Nearby Shelves"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary_light"
+            android:textColor="@color/text_primary_dark"
             android:layout_marginBottom="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:overScrollMode="never"
-            android:background="@color/card_background_light" />
+            android:background="@color/card_background_dark" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_navigate"

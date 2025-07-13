@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:background="@color/background_dark">
 
     <!-- App Bar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_light"
+        android:background="@color/background_dark"
         app:elevation="0dp">
 
         <LinearLayout
@@ -24,7 +24,7 @@
                 android:text="Create New Shelf"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary_light"
+                android:textColor="@color/text_primary_dark"
                 android:layout_marginBottom="8dp" />
 
             <TextView
@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:text="Add a new shelf location for navigation"
                 android:textSize="14sp"
-                android:textColor="@color/text_secondary_light" />
+                android:textColor="@color/text_secondary_dark" />
 
         </LinearLayout>
 
@@ -57,8 +57,8 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/card_background_light"
-                app:strokeColor="@color/divider_light"
+                app:cardBackgroundColor="@color/card_background_dark"
+                app:strokeColor="@color/divider_dark"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -78,15 +78,15 @@
                         app:boxCornerRadiusTopEnd="8dp"
                         app:boxCornerRadiusBottomStart="8dp"
                         app:boxCornerRadiusBottomEnd="8dp"
-                        app:boxStrokeColor="@color/walmart_blue"
-                        app:hintTextColor="@color/walmart_blue">
+                        app:boxStrokeColor="@color/accent_blue"
+                        app:hintTextColor="@color/accent_blue">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/input_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"
-                            android:textColor="@color/text_primary_light" />
+                            android:textColor="@color/text_primary_dark" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Description -->
@@ -100,15 +100,15 @@
                         app:boxCornerRadiusTopEnd="8dp"
                         app:boxCornerRadiusBottomStart="8dp"
                         app:boxCornerRadiusBottomEnd="8dp"
-                        app:boxStrokeColor="@color/walmart_blue"
-                        app:hintTextColor="@color/walmart_blue">
+                        app:boxStrokeColor="@color/accent_blue"
+                        app:hintTextColor="@color/accent_blue">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/input_description"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"
-                            android:textColor="@color/text_primary_light" />
+                            android:textColor="@color/text_primary_dark" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Author -->
@@ -121,15 +121,15 @@
                         app:boxCornerRadiusTopEnd="8dp"
                         app:boxCornerRadiusBottomStart="8dp"
                         app:boxCornerRadiusBottomEnd="8dp"
-                        app:boxStrokeColor="@color/walmart_blue"
-                        app:hintTextColor="@color/walmart_blue">
+                        app:boxStrokeColor="@color/accent_blue"
+                        app:hintTextColor="@color/accent_blue">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/input_author"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text"
-                            android:textColor="@color/text_primary_light" />
+                            android:textColor="@color/text_primary_dark" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
@@ -151,11 +151,11 @@
                     android:layout_weight="1"
                     android:layout_marginEnd="8dp"
                     android:text="@string/button_cancel_and_redo_ar"
-                    android:textColor="@color/walmart_blue"
+                    android:textColor="@color/accent_blue"
                     android:visibility="gone"
-                    app:backgroundTint="@color/surface_light"
+                    app:backgroundTint="@color/surface_dark"
                     app:cornerRadius="8dp"
-                    app:strokeColor="@color/walmart_blue"
+                    app:strokeColor="@color/accent_blue"
                     app:strokeWidth="1dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -166,7 +166,7 @@
                     android:layout_marginStart="8dp"
                     android:text="@string/button_try_ar_route"
                     android:textColor="@color/white"
-                    app:backgroundTint="@color/walmart_blue"
+                    app:backgroundTint="@color/accent_blue"
                     app:cornerRadius="8dp" />
 
             </LinearLayout>
@@ -197,7 +197,7 @@
                     android:layout_marginStart="8dp"
                     android:text="Create Shelf"
                     android:textColor="@color/white"
-                    app:backgroundTint="@color/walmart_blue"
+                    app:backgroundTint="@color/accent_blue"
                     app:cornerRadius="8dp" />
 
             </LinearLayout>
@@ -209,8 +209,8 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/card_background_light"
-                app:strokeColor="@color/divider_light"
+                app:cardBackgroundColor="@color/card_background_dark"
+                app:strokeColor="@color/divider_dark"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
@@ -225,7 +225,7 @@
                         android:text="Location Information"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary_light"
+                        android:textColor="@color/text_primary_dark"
                         android:layout_marginBottom="12dp" />
 
                     <!-- Latitude and Longitude -->
@@ -247,15 +247,15 @@
                             app:boxCornerRadiusTopEnd="6dp"
                             app:boxCornerRadiusBottomStart="6dp"
                             app:boxCornerRadiusBottomEnd="6dp"
-                            app:boxStrokeColor="@color/divider_light"
-                            app:hintTextColor="@color/text_secondary_light">
+                            app:boxStrokeColor="@color/divider_dark"
+                            app:hintTextColor="@color/text_secondary_dark">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/input_lat"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="numberDecimal"
-                                android:textColor="@color/text_primary_light" />
+                                android:textColor="@color/text_primary_dark" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -270,15 +270,15 @@
                             app:boxCornerRadiusTopEnd="6dp"
                             app:boxCornerRadiusBottomStart="6dp"
                             app:boxCornerRadiusBottomEnd="6dp"
-                            app:boxStrokeColor="@color/divider_light"
-                            app:hintTextColor="@color/text_secondary_light">
+                            app:boxStrokeColor="@color/divider_dark"
+                            app:hintTextColor="@color/text_secondary_dark">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/input_lng"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="numberDecimal"
-                                android:textColor="@color/text_primary_light" />
+                                android:textColor="@color/text_primary_dark" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
@@ -301,15 +301,15 @@
                             app:boxCornerRadiusTopEnd="6dp"
                             app:boxCornerRadiusBottomStart="6dp"
                             app:boxCornerRadiusBottomEnd="6dp"
-                            app:boxStrokeColor="@color/divider_light"
-                            app:hintTextColor="@color/text_secondary_light">
+                            app:boxStrokeColor="@color/divider_dark"
+                            app:hintTextColor="@color/text_secondary_dark">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/input_alt"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="numberDecimal"
-                                android:textColor="@color/text_primary_light" />
+                                android:textColor="@color/text_primary_dark" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -324,15 +324,15 @@
                             app:boxCornerRadiusTopEnd="6dp"
                             app:boxCornerRadiusBottomStart="6dp"
                             app:boxCornerRadiusBottomEnd="6dp"
-                            app:boxStrokeColor="@color/divider_light"
-                            app:hintTextColor="@color/text_secondary_light">
+                            app:boxStrokeColor="@color/divider_dark"
+                            app:hintTextColor="@color/text_secondary_dark">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/input_hdg"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="numberDecimal"
-                                android:textColor="@color/text_primary_light" />
+                                android:textColor="@color/text_primary_dark" />
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
@@ -347,8 +347,8 @@
                 android:layout_height="300dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/card_background_light"
-                app:strokeColor="@color/divider_light"
+                app:cardBackgroundColor="@color/card_background_dark"
+                app:strokeColor="@color/divider_dark"
                 app:strokeWidth="1dp">
 
                 <androidx.fragment.app.FragmentContainerView

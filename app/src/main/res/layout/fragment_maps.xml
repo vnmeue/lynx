@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:background="@color/background_dark">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
@@ -22,7 +22,7 @@
             android:id="@+id/map_my_location_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/walmart_blue"
+            android:backgroundTint="@color/accent_blue"
             android:contentDescription="@string/fab_my_location_descr"
             android:elevation="4dp"
             app:borderWidth="0dp"
@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:backgroundTint="@color/walmart_blue"
+            android:backgroundTint="@color/accent_blue_dark"
             android:contentDescription="@string/fab_add_descr"
             android:elevation="4dp"
             android:src="@drawable/ic_baseline_add_location_alt_24"
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:backgroundTint="@color/walmart_yellow"
+            android:backgroundTint="@color/highlight_blue"
             android:contentDescription="@string/fab_route_descr"
             android:elevation="4dp"
             android:src="@drawable/ic_baseline_directions_24"

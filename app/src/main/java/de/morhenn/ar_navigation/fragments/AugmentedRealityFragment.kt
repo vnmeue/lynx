@@ -44,7 +44,6 @@ import io.github.sceneview.ar.node.ArNode
 import io.github.sceneview.ar.node.PlacementMode
 import io.github.sceneview.ar.scene.PlaneRenderer
 import io.github.sceneview.math.*
-import io.github.sceneview.model.await
 import io.github.sceneview.node.ViewNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -56,6 +55,7 @@ import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.math.atan2
 import android.widget.Toast
+import io.github.sceneview.model.await
 
 
 class AugmentedRealityFragment : Fragment() {
@@ -655,12 +655,14 @@ class AugmentedRealityFragment : Fragment() {
                 AppState.PLACE_OBJECT -> {
                     anchorNode?.let { anchorNode ->
                         ArModelNode(PlacementMode.DISABLED).apply {
-                            val angle = startRotation - sceneView.camera.transform.rotation.y
-                            val rotationMatrix = rotation(axis = anchorNode.pose!!.yDirection, angle = angle) //Rotation around the Y-Axis of the anchorPlane
-
                             parent = anchorNode
-                            position = anchorNode.worldToLocalPosition(pNode.worldPosition.toVector3()).toFloat3()
-                            quaternion = rotationMatrix.toQuaternion()
+                            val origPos = anchorNode.worldToLocalPosition(pNode.worldPosition.toVector3()).toFloat3()
+                            position = Position(origPos.x, 0.01f, origPos.z) // Set just above ground
+                            // Set rotation to match camera's facing direction
+                            val cameraRotation = sceneView.camera.transform.rotation
+                            val forward = sceneView.camera.transform.forward
+                            val heading = kotlin.math.atan2(forward.x, forward.z)
+                            rotation = Rotation(0f, heading, 0f) // Keep arrow parallel to ground
                             setModel(modelMap[selectedModel])
                             modelScale = Scale(this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale)
                             updateState(AppState.PLACE_OBJECT)
@@ -671,12 +673,14 @@ class AugmentedRealityFragment : Fragment() {
                 AppState.PLACE_TARGET -> {
                     anchorNode?.let { anchorNode ->
                         ArModelNode(PlacementMode.DISABLED).apply {
-                            val angle = startRotation - sceneView.camera.transform.rotation.y
-                            val rotationMatrix = rotation(axis = anchorNode.pose!!.yDirection, angle = angle) //Rotation around the Y-Axis of the anchorPlane
-
                             parent = anchorNode
-                            position = anchorNode.worldToLocalPosition(pNode.worldPosition.toVector3()).toFloat3()
-                            quaternion = rotationMatrix.toQuaternion()
+                            val origPos = anchorNode.worldToLocalPosition(pNode.worldPosition.toVector3()).toFloat3()
+                            position = Position(origPos.x, 0.01f, origPos.z) // Set just above ground
+                            // Set rotation to match camera's facing direction
+                            val cameraRotation = sceneView.camera.transform.rotation
+                            val forward = sceneView.camera.transform.forward
+                            val heading = kotlin.math.atan2(forward.x, forward.z)
+                            rotation = Rotation(0f, heading, 0f) // Keep arrow parallel to ground
                             setModel(modelMap[TARGET])
                             modelScale = Scale(this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale)
                             updateState(AppState.TARGET_PLACED)
@@ -767,6 +771,29 @@ class AugmentedRealityFragment : Fragment() {
             author = "",
             ardata = arRouteJson
         )
+        val place = de.morhenn.ar_navigation.persistance.Place(
+            id = java.util.UUID.randomUUID().toString(),
+            name = shelfName,
+            lat = geoLat,
+            lng = geoLng,
+            alt = geoAlt,
+            heading = geoHdg,
+            description = "",
+            author = "",
+            ardata = arRouteJson
+        )
+        // Save to local Room database in background
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                de.morhenn.ar_navigation.persistance.AppDatabase.getInstance().placeDao().insertPlace(place)
+            } catch (e: Exception) {
+                // Post Toast to main thread
+                activity?.runOnUiThread {
+                    android.widget.Toast.makeText(requireContext(), "Failed to save shelf locally: ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+        // Try to save to backend, but always save locally
         de.morhenn.ar_navigation.persistance.PlaceRepository.getInstance().newPlace(newPlace)
         // Navigate to Home and show a success message
         findNavController().navigate(R.id.action_arFragment_to_homeFragment)
@@ -888,13 +915,24 @@ class AugmentedRealityFragment : Fragment() {
                         anchorNode.anchor = anchor
                         anchorNode.isVisible = true
 
-                        route.pointsList.forEach {
+                        val points = route.pointsList
+                        points.forEachIndexed { idx, it ->
                             ArModelNode(PlacementMode.DISABLED).apply {
                                 parent = anchorNode //Set the anchor to the cloudAnchor
                                 val pos = anchorNode.localToWorldPosition(it.position.toVector3())
-                                position = Position(pos.x, pos.y, pos.z)
+                                position = Position(pos.x, 0.01f, pos.z) // Set just above ground
                                 modelScale = Scale(it.scale, it.scale, it.scale)
-                                rotation = it.rotation
+                                // If there is a next point, look at it, else use saved rotation
+                                if (idx < points.size - 1) {
+                                    val next = anchorNode.localToWorldPosition(points[idx + 1].position.toVector3())
+                                    val dx = next.x - pos.x
+                                    val dz = next.z - pos.z
+                                    val heading = kotlin.math.atan2(dx, dz)
+                                    val rot = Rotation(0f, heading, 0f)
+                                    rotation = rot
+                                } else {
+                                    rotation = it.rotation
+                                }
                                 setModel(modelMap[it.modelName])
                                 addNode(this)
                                 placedNew = true
@@ -1538,18 +1576,58 @@ class AugmentedRealityFragment : Fragment() {
             Toast.makeText(requireContext(), "Camera pose unavailable", Toast.LENGTH_SHORT).show()
             return
         }
-        val position = Position(cameraPose.tx(), cameraPose.ty(), cameraPose.tz())
-        // Use the forward vector (z axis) as rotation
-        val zAxis = cameraPose.getZAxis()
-        val rotation = Rotation(zAxis[0], zAxis[1], zAxis[2])
+        val position = Position(cameraPose.tx(), 0.01f, cameraPose.tz()) // Set just above ground
+        // Set rotation to match camera's facing direction
+        val cameraRotation = sceneView.camera.transform.rotation
+        val forward = sceneView.camera.transform.forward
+        val heading = kotlin.math.atan2(forward.x, forward.z)
         val node = ArModelNode(PlacementMode.DISABLED).apply {
             parent = anchorNode ?: sceneView
             this.position = position
-            // For node orientation, you may want to use quaternion, but for ArPoint, use Rotation
+            this.rotation = Rotation(0f, heading, 0f) // Keep arrow parallel to ground
             setModel(modelMap[model])
             modelScale = Scale(this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale)
         }
         addNode(node)
         Toast.makeText(requireContext(), "${model.name} node added", Toast.LENGTH_SHORT).show()
+    }
+
+    // Helper to compute a Rotation from a forward and up vector
+    private fun lookAtRotation(fx: Float, fy: Float, fz: Float, ux: Float, uy: Float, uz: Float): Rotation {
+        // Normalize forward
+        val flen = kotlin.math.sqrt(fx * fx + fy * fy + fz * fz)
+        val f0 = fx / flen
+        val f1 = fy / flen
+        val f2 = fz / flen
+        // Cross up x forward (right vector)
+        val rx = uy * f2 - uz * f1
+        val ry = uz * f0 - ux * f2
+        val rz = ux * f1 - uy * f0
+        val rlen = kotlin.math.sqrt(rx * rx + ry * ry + rz * rz)
+        val r0 = rx / rlen
+        val r1 = ry / rlen
+        val r2 = rz / rlen
+        // Cross forward x right (up vector)
+        val u0 = f1 * r2 - f2 * r1
+        val u1 = f2 * r0 - f0 * r2
+        val u2 = f0 * r1 - f1 * r0
+        val m00 = r0; val m01 = r1; val m02 = r2
+        val m10 = u0; val m11 = u1; val m12 = u2
+        val m20 = f0; val m21 = f1; val m22 = f2
+        val sy = kotlin.math.sqrt(m00 * m00 + m10 * m10)
+        val singular = sy < 1e-6
+        val x: Float
+        val y: Float
+        val z: Float
+        if (!singular) {
+            x = kotlin.math.atan2(m21, m22).toFloat()
+            y = kotlin.math.atan2(-m20, sy).toFloat()
+            z = kotlin.math.atan2(m10, m00).toFloat()
+        } else {
+            x = kotlin.math.atan2(-m12, m11).toFloat()
+            y = kotlin.math.atan2(-m20, sy).toFloat()
+            z = 0f
+        }
+        return Rotation(x, y, z)
     }
 }
