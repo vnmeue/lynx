@@ -44,6 +44,10 @@
             android:name="createMode"
             app:argType="boolean"
             android:defaultValue="false" />
+        <argument
+            android:name="shelfName"
+            app:argType="string"
+            android:defaultValue="" />
         <action
             android:id="@+id/action_arFragment_to_createFragment"
             app:destination="@id/createFragment"

@@ -75,9 +75,24 @@ class HomeFragment : Fragment() {
         }
         // New Shelf Add
         addShelfButton.setOnClickListener {
-            // Navigate to AR fragment in create mode
-            val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = true)
-            findNavController().navigate(action)
+            // Prompt for shelf name before navigating
+            val context = requireContext()
+            val input = EditText(context)
+            input.hint = "Shelf name"
+            androidx.appcompat.app.AlertDialog.Builder(context)
+                .setTitle("Enter Shelf Name")
+                .setView(input)
+                .setPositiveButton("OK") { _, _ ->
+                    val shelfName = input.text.toString().trim()
+                    if (shelfName.isNotEmpty()) {
+                        val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = true, shelfName = shelfName)
+                        findNavController().navigate(action)
+                    } else {
+                        Toast.makeText(context, "Shelf name required", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
         // My Location
         myLocationButton.setOnClickListener {

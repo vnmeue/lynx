@@ -55,6 +55,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.math.atan2
+import android.widget.Toast
 
 
 class AugmentedRealityFragment : Fragment() {
@@ -126,6 +127,10 @@ class AugmentedRealityFragment : Fragment() {
         HOST,
     }
 
+    enum class NavStep { LEFT, RIGHT, FORWARD }
+    private var isRecording = false
+    private val navSteps = mutableListOf<NavStep>()
+
     private var _binding: FragmentAugmentedRealityBinding? = null
     private val binding get() = _binding!!
 
@@ -173,6 +178,8 @@ class AugmentedRealityFragment : Fragment() {
 
     private val viewModel: MainViewModel by navGraphViewModels(R.id.nav_graph_xml)
 
+    private var initialShelfName: String? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAugmentedRealityBinding.inflate(inflater, container, false)
         return binding.root
@@ -181,8 +188,9 @@ class AugmentedRealityFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Read createMode argument
+        // Read createMode and shelfName arguments
         val createMode = arguments?.getBoolean("createMode") ?: false
+        initialShelfName = arguments?.getString("shelfName")
 
         lifecycleScope.launchWhenCreated {
             loadModels()
@@ -209,9 +217,15 @@ class AugmentedRealityFragment : Fragment() {
         }
 
         sceneView.onArFrame = { arFrame ->
+            Log.d(TAG, "onArFrame: isTrackingPlane=${arFrame.isTrackingPlane}, isTracking=$isTracking, appState=$appState")
+            // Show live tracking state and accuracy
+            val earthTrackingState = sceneView.arSession?.earth?.trackingState?.name ?: "NO_EARTH"
+            val hAcc = sceneView.arSession?.earth?.cameraGeospatialPose?.horizontalAccuracy ?: -1f
+            binding.arTrackingStatus.text = "Tracking: $earthTrackingState\nHAcc: $hAcc"
             if (arFrame.isTrackingPlane && !isTracking) {
                 isTracking = true
                 binding.arExtendedFab.isEnabled = true
+                Toast.makeText(requireContext(), "Plane tracked, AR ready", Toast.LENGTH_SHORT).show()
                 if (!navOnly && !isSearchingMode) {
                     anchorCircle = AnchorHostingPoint(requireContext(), Filament.engine, sceneView.renderer.filamentScene)
                     anchorCircle.enabled = true
@@ -222,11 +236,14 @@ class AugmentedRealityFragment : Fragment() {
                 }
             }
             if (appState == AppState.PLACE_ANCHOR) {
+                placementNode?.isVisible = true
                 placementNode?.let {
                     it.pose?.let { pose ->
                         anchorCircle.setPosition(pose)
                     }
                 }
+            } else if (appState == AppState.PLACE_OBJECT) {
+                placementNode?.isVisible = true
             } else if (appState == AppState.WAITING_FOR_ANCHOR_CIRCLE) {
                 if (anchorCircle.isInFrame(arFrame.camera)) {
                     anchorCircle.highlightSegment(arFrame.camera.pose)
@@ -277,6 +294,52 @@ class AugmentedRealityFragment : Fragment() {
                 else -> {
                     throw IllegalStateException("Invalid NavState in AugmentedRealityFragment: ${viewModel.navState}")
                 }
+            }
+        }
+        setNavRecordControls("idle")
+        // Navigation recording controls
+        binding.btnNavStart.setOnClickListener {
+            isRecording = true
+            navSteps.clear()
+            setNavRecordControls("recording")
+            Toast.makeText(requireContext(), "Recording started", Toast.LENGTH_SHORT).show()
+        }
+        binding.btnNavLeft.setOnClickListener {
+            if (isRecording) {
+                navSteps.add(NavStep.LEFT)
+                Toast.makeText(requireContext(), "Left step added", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Press Start to begin recording", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.btnNavRight.setOnClickListener {
+            if (isRecording) {
+                navSteps.add(NavStep.RIGHT)
+                Toast.makeText(requireContext(), "Right step added", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Press Start to begin recording", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.btnNavForward.setOnClickListener {
+            if (isRecording) {
+                navSteps.add(NavStep.FORWARD)
+                Toast.makeText(requireContext(), "Forward step added", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Press Start to begin recording", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.btnNavSave.setOnClickListener {
+            if (isRecording && navSteps.isNotEmpty()) {
+                isRecording = false
+                setNavRecordControls("done")
+                // Save navSteps as part of the shelf (for now, just show a Toast)
+                Toast.makeText(requireContext(), "Route saved: ${navSteps.joinToString()}\nShelf: ${initialShelfName}", Toast.LENGTH_LONG).show()
+                // TODO: Integrate navSteps into AR route saving logic
+                navSteps.clear()
+            } else if (!isRecording) {
+                Toast.makeText(requireContext(), "Press Start to begin recording", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Add at least one step before saving", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -450,6 +513,8 @@ class AugmentedRealityFragment : Fragment() {
     }
 
     private fun onPlace() {
+        Log.d(TAG, "onPlace() called, appState=$appState, placementNode=${placementNode != null}")
+        Toast.makeText(requireContext(), "onPlace() called, state: $appState", Toast.LENGTH_SHORT).show()
         if (appState == AppState.HOST_FAIL) {
             appState = AppState.PLACE_ANCHOR
         }
@@ -459,6 +524,8 @@ class AugmentedRealityFragment : Fragment() {
                     sceneView.arSession?.earth?.let { earth ->
                         if (earth.trackingState == TrackingState.TRACKING) {
                             val cameraGeospatialPose = earth.cameraGeospatialPose
+                            Log.d(TAG, "AR tracking, horizontalAccuracy=${cameraGeospatialPose.horizontalAccuracy}")
+                            Toast.makeText(requireContext(), "AR tracking, hAcc=${cameraGeospatialPose.horizontalAccuracy}", Toast.LENGTH_SHORT).show()
                             if (IGNORE_GEO_ACC || cameraGeospatialPose.horizontalAccuracy < H_ACC_2) {
                                 updateState(AppState.WAITING_FOR_ANCHOR_CIRCLE)
                                 anchorNode = ArModelNode(PlacementMode.DISABLED).apply {
@@ -469,9 +536,13 @@ class AugmentedRealityFragment : Fragment() {
                                 }
                                 startRotation = sceneView.camera.transform.rotation.y
                                 calculateLatLongOfPlacementNode(cameraGeospatialPose)
+                            } else {
+                                Toast.makeText(requireContext(), "Accuracy not sufficient: ${cameraGeospatialPose.horizontalAccuracy}", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            Toast.makeText(requireContext(), "AR session not tracking", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    } ?: Toast.makeText(requireContext(), "Earth object is null", Toast.LENGTH_SHORT).show()
                 }
                 AppState.PLACE_OBJECT -> {
                     anchorNode?.let { anchorNode ->
@@ -507,7 +578,10 @@ class AugmentedRealityFragment : Fragment() {
                 }
                 else -> FileLog.e(TAG, "Invalid state when trying to place object")
             }
-        } ?: FileLog.e(TAG, "No placement node available, but onPlace pressed")
+        } ?: run {
+            FileLog.e(TAG, "No placement node available, but onPlace pressed")
+            Toast.makeText(requireContext(), "No placement node available", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun onHost() {
@@ -523,6 +597,8 @@ class AugmentedRealityFragment : Fragment() {
                     binding.arFabLayout.visibility = View.VISIBLE
                     anchorNode.isVisible = true
                     anchorCircle.enabled = false
+                    // FIX: Allow user to place arrows after hosting
+                    updateState(AppState.PLACE_OBJECT)
                 } else {
                     updateState(AppState.HOST_FAIL)
                     binding.arExtendedFab.isEnabled = true
@@ -544,6 +620,13 @@ class AugmentedRealityFragment : Fragment() {
     }
 
     private fun showShelfNamingDialogAndSave() {
+        // If shelfName was provided, skip dialog and save directly
+        initialShelfName?.let { shelfName ->
+            if (shelfName.isNotBlank()) {
+                saveNewShelf(shelfName)
+                return
+            }
+        }
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_name_shelf, null)
         val etShelfName = dialogView.findViewById<android.widget.EditText>(R.id.et_shelf_name)
         val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -1263,6 +1346,12 @@ class AugmentedRealityFragment : Fragment() {
                         "To resolve a route, look at it and press resolve"
             }
         }
+        if (appState == AppState.PLACE_ANCHOR && initialShelfName != null && initialShelfName!!.isNotBlank()) {
+            setNavRecordControls("ready")
+        }
+        if (appState == AppState.PLACE_OBJECT || appState == AppState.TARGET_PLACED) {
+            setNavRecordControls("idle")
+        }
     }
 
     private fun updateExtendedFab(type: FabState) {
@@ -1284,6 +1373,16 @@ class AugmentedRealityFragment : Fragment() {
                 binding.arExtendedFab.icon = requireActivity().getDrawable(R.drawable.ic_baseline_cloud_upload_24)
             }
         }
+    }
+
+    private fun setNavRecordControls(state: String) {
+        // state: "idle", "ready", "recording", "done"
+        binding.btnNavStart.visibility = if (state == "ready") View.VISIBLE else View.GONE
+        binding.btnNavLeft.visibility = if (state == "recording") View.VISIBLE else View.GONE
+        binding.btnNavRight.visibility = if (state == "recording") View.VISIBLE else View.GONE
+        binding.btnNavForward.visibility = if (state == "recording") View.VISIBLE else View.GONE
+        binding.btnNavSave.visibility = if (state == "recording") View.VISIBLE else View.GONE
+        binding.arNavRecordControls.visibility = if (state == "idle" || state == "done") View.GONE else View.VISIBLE
     }
 
     override fun onPause() {
