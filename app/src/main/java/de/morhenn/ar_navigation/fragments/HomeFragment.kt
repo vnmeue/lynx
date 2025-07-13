@@ -16,19 +16,29 @@ import com.google.android.material.button.MaterialButton
 import de.morhenn.ar_navigation.MainViewModel
 import de.morhenn.ar_navigation.R
 import de.morhenn.ar_navigation.persistance.Place
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import android.widget.ImageView
+import android.widget.LinearLayout
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
-class HomeFragment : Fragment() {
-    private lateinit var searchEditText: EditText
+class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var recentShelvesRecyclerView: RecyclerView
     private lateinit var browseShelvesButton: MaterialButton
     private lateinit var addShelfButton: MaterialButton
     private lateinit var arNavigationButton: MaterialButton
     private lateinit var mapViewButton: MaterialButton
     private lateinit var viewAllButton: TextView
+    private lateinit var billToShelvesButton: MaterialButton
 
     private val viewModel: MainViewModel by viewModels()
     private lateinit var recentShelvesAdapter: RecentShelfAdapter
     private var shelves: List<Place> = emptyList()
+    private var mapPreview: GoogleMap? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,20 +46,42 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
         
         // Initialize views
-        searchEditText = view.findViewById(R.id.et_search)
         recentShelvesRecyclerView = view.findViewById(R.id.rv_recent_shelves)
         browseShelvesButton = view.findViewById(R.id.btn_browse_shelves)
         addShelfButton = view.findViewById(R.id.btn_add_shelf)
         arNavigationButton = view.findViewById(R.id.btn_ar_navigation)
         mapViewButton = view.findViewById(R.id.btn_map_view)
         viewAllButton = view.findViewById(R.id.btn_view_all)
+        billToShelvesButton = view.findViewById(R.id.btn_bill_to_shelves)
 
         setupRecyclerView()
         setupClickListeners()
-        setupSearch()
         observeShelves()
         
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // Setup map preview
+        val mapPreviewFragment = childFragmentManager.findFragmentById(R.id.map_preview_fragment) as? SupportMapFragment
+        mapPreviewFragment?.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mapPreview = googleMap
+        // Set preview location (e.g., center of a store or city)
+        val previewLatLng = LatLng(37.4221, -122.0841) // Example: Googleplex
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(previewLatLng, 17f))
+        // Enable gestures so user can pan and zoom to see markers
+        googleMap.uiSettings.setAllGesturesEnabled(true)
+        googleMap.uiSettings.isMapToolbarEnabled = false
+        googleMap.uiSettings.isMyLocationButtonEnabled = false
+
+        // Add preview shelf markers
+        googleMap.addMarker(MarkerOptions().position(LatLng(37.4221, -122.0841)).title("Electronics Shelf"))
+        googleMap.addMarker(MarkerOptions().position(LatLng(37.4222, -122.0842)).title("Grocery Shelf"))
+        googleMap.addMarker(MarkerOptions().position(LatLng(37.4223, -122.0843)).title("Clothes Shelf"))
     }
 
     private fun observeShelves() {
@@ -84,29 +116,57 @@ class HomeFragment : Fragment() {
         }
         // New Shelf Add
         addShelfButton.setOnClickListener {
-            // Prompt for shelf name before navigating
+            // Show modern dialog for shelf name entry
             val context = requireContext()
-            val input = EditText(context)
-            input.hint = "Shelf name"
-            androidx.appcompat.app.AlertDialog.Builder(context)
-                .setTitle("Enter Shelf Name")
-                .setView(input)
-                .setPositiveButton("OK") { _, _ ->
-                    val shelfName = input.text.toString().trim()
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_enter_shelf_name, null)
+            val inputLayout = dialogView.findViewById<com.google.android.material.textfield.TextInputLayout>(R.id.input_shelf_name_layout)
+            val input = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.input_shelf_name)
+            val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
+                .setView(dialogView)
+                .setPositiveButton("OK", null)
+                .setNegativeButton("Cancel", null)
+                .create()
+            dialog.setOnShowListener {
+                val button = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                button.setOnClickListener {
+                    val shelfName = input.text?.toString()?.trim() ?: ""
                     if (shelfName.isNotEmpty()) {
                         val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = true, shelfName = shelfName)
                         findNavController().navigate(action)
+                        dialog.dismiss()
                     } else {
-                        Toast.makeText(context, "Shelf name required", Toast.LENGTH_SHORT).show()
+                        inputLayout.error = "Shelf name required"
                     }
                 }
-                .setNegativeButton("Cancel", null)
-                .show()
+            }
+            dialog.show()
+        }
+        // Bill to Shelves (Image to Text to Navigate) - TODO
+        billToShelvesButton.setOnClickListener {
+            Toast.makeText(requireContext(), "Bill to Shelves (Image to Text to Navigate) - TODO", Toast.LENGTH_SHORT).show()
         }
         // AR Navigation
         arNavigationButton.setOnClickListener {
-            val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = false)
-            findNavController().navigate(action)
+            // Show modern bottom sheet for shelf selection
+            val dialog = BottomSheetDialog(requireContext())
+            val sheetView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_select_shelf, null)
+            val electronics = sheetView.findViewById<LinearLayout>(R.id.option_electronics)
+            val grocery = sheetView.findViewById<LinearLayout>(R.id.option_grocery)
+            val clothes = sheetView.findViewById<LinearLayout>(R.id.option_clothes)
+            electronics.setOnClickListener {
+                Toast.makeText(requireContext(), "Navigate to: Electronics Shelf (TODO)", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            grocery.setOnClickListener {
+                Toast.makeText(requireContext(), "Navigate to: Grocery Shelf (TODO)", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            clothes.setOnClickListener {
+                Toast.makeText(requireContext(), "Navigate to: Clothes Shelf (TODO)", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            dialog.setContentView(sheetView)
+            dialog.show()
         }
         // Map View
         mapViewButton.setOnClickListener {
@@ -116,25 +176,6 @@ class HomeFragment : Fragment() {
         viewAllButton.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
-    }
-
-    private fun setupSearch() {
-        searchEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
-                val query = searchEditText.text.toString().trim()
-                if (query.isNotEmpty()) {
-                    performSearch(query)
-                }
-                true
-            } else {
-                false
-            }
-        }
-    }
-
-    private fun performSearch(query: String) {
-        // TODO: Implement search functionality
-        Toast.makeText(requireContext(), "Searching for: $query", Toast.LENGTH_SHORT).show()
     }
 
     // RecyclerView Adapter for recent shelves

@@ -5,116 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/background_dark">
 
-    <!-- App Bar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/background_dark"
-        app:elevation="0dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <!-- Header with branding -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="20dp">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:src="@drawable/ic_baseline_view_in_ar_24"
-                    android:background="@drawable/rounded_corners_highlighted"
-                    android:padding="12dp"
-                    android:tint="@color/accent_blue"
-                    android:contentDescription="Lynx Navigator Icon" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lynx Navigator"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary_dark" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Find your way to any shelf"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary_dark" />
-
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_baseline_person_24"
-                    android:tint="@color/icon_tint_dark"
-                    android:contentDescription="Profile" />
-
-            </LinearLayout>
-
-            <!-- Search Bar -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/surface_dark"
-                app:strokeColor="@color/divider_dark"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_baseline_explore_24"
-                        android:tint="@color/icon_tint_dark"
-                        android:contentDescription="Search Icon" />
-
-                    <EditText
-                        android:id="@+id/et_search"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:hint="Search shelves, departments, or items..."
-                        android:textColor="@color/text_primary_dark"
-                        android:textColorHint="@color/text_secondary_dark"
-                        android:background="@null"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:textSize="16sp"
-                        android:imeOptions="actionSearch" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
     <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -126,6 +16,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="20dp">
+
+            <!-- Map Preview Section -->
+            <FrameLayout
+                android:id="@+id/map_preview"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/rounded_corners"
+                android:elevation="2dp"
+                android:clipToOutline="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_gravity="center_horizontal">
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/map_preview_fragment"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
 
             <!-- Main Actions Section -->
             <TextView
@@ -154,35 +62,36 @@
                     <!-- Browse Shelves Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="110dp"
                         android:layout_weight="1"
-                        android:layout_marginEnd="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="3dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="8dp"
                         app:cardBackgroundColor="@color/card_background_dark"
                         app:strokeColor="@color/divider_dark"
-                        app:strokeWidth="1dp">
+                        app:strokeWidth="1dp"
+                        app:rippleColor="@color/accent_blue">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="16dp">
+                            android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_baseline_explore_24"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/shelf_double_down_1534_svgrepo_com"
                                 android:contentDescription="Browse Icon"
-                                android:layout_marginBottom="8dp"
+                                android:layout_marginBottom="6dp"
                                 android:tint="@color/accent_blue" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Go to Shelf"
-                                android:textSize="14sp"
+                                android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/text_primary_dark"
                                 android:gravity="center" />
@@ -198,42 +107,44 @@
                             android:insetBottom="0dp"
                             android:insetLeft="0dp"
                             android:insetRight="0dp"
-                            app:cornerRadius="12dp" />
+                            app:cornerRadius="16dp" />
 
                     </com.google.android.material.card.MaterialCardView>
 
                     <!-- Add Shelf Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="0dp"
-                        android:layout_height="120dp"
+                        android:layout_height="110dp"
                         android:layout_weight="1"
-                        android:layout_marginStart="6dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="3dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="8dp"
                         app:cardBackgroundColor="@color/card_background_dark"
                         app:strokeColor="@color/divider_dark"
-                        app:strokeWidth="1dp">
+                        app:strokeWidth="1dp"
+                        app:rippleColor="@color/walmart_orange">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="16dp">
+                            android:padding="10dp">
 
                             <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:src="@drawable/ic_baseline_add_location_alt_24"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/ic_baseline_add_24"
                                 android:contentDescription="Add Shelf Icon"
-                                android:layout_marginBottom="8dp"
-                                android:tint="@color/walmart_orange" />
+                                android:layout_marginBottom="6dp"
+                                android:tint="@color/walmart_yellow" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="New Shelf Add"
-                                android:textSize="14sp"
+                                android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/text_primary_dark"
                                 android:gravity="center" />
@@ -249,7 +160,59 @@
                             android:insetBottom="0dp"
                             android:insetLeft="0dp"
                             android:insetRight="0dp"
-                            app:cornerRadius="12dp" />
+                            app:cornerRadius="16dp" />
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Bill to Shelves Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="110dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="8dp"
+                        app:cardBackgroundColor="@color/card_background_dark"
+                        app:strokeColor="@color/divider_dark"
+                        app:strokeWidth="1dp"
+                        app:rippleColor="@color/accent_blue">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:src="@drawable/camera"
+                                android:contentDescription="Bill to Shelves Icon"
+                                android:layout_marginBottom="6dp"
+                                android:tint="@color/accent_blue" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Bill to Shelves"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_primary_dark"
+                                android:gravity="center" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_bill_to_shelves"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:insetLeft="0dp"
+                            android:insetRight="0dp"
+                            app:cornerRadius="16dp" />
 
                     </com.google.android.material.card.MaterialCardView>
 
