@@ -25,12 +25,8 @@ class HomeFragment : Fragment() {
     private lateinit var mapViewButton: MaterialButton
     private lateinit var viewAllButton: TextView
 
-    // Mock data for recent shelves
-    private val recentShelves = listOf(
-        Shelf("Aisle 1", "Snacks & Chips", "2 min ago"),
-        Shelf("Aisle 3", "Dairy Products", "5 min ago"),
-        Shelf("Aisle 7", "Beverages", "10 min ago")
-    )
+    // Remove mock data for recent shelves
+    private val recentShelves = emptyList<Shelf>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -59,46 +55,49 @@ class HomeFragment : Fragment() {
         recentShelvesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         recentShelvesRecyclerView.adapter = RecentShelfAdapter(recentShelves) { shelf ->
             // Navigate to maps fragment to show shelf location
-            Toast.makeText(requireContext(), "Navigating to ${shelf.name}", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
+        }
+        // Show empty state if no shelves
+        if (recentShelves.isEmpty()) {
+            recentShelvesRecyclerView.visibility = View.GONE
+            // Optionally show a TextView with 'No recent shelves' (add to layout if not present)
+            view?.findViewById<TextView>(R.id.tv_no_recent_shelves)?.visibility = View.VISIBLE
+        } else {
+            recentShelvesRecyclerView.visibility = View.VISIBLE
+            view?.findViewById<TextView>(R.id.tv_no_recent_shelves)?.visibility = View.GONE
         }
     }
 
     private fun setupClickListeners() {
-        // Quick action buttons
+        // Go to Shelf
         browseShelvesButton.setOnClickListener {
-            // Navigate to maps fragment to browse shelves
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
-
+        // New Shelf Add
         addShelfButton.setOnClickListener {
-            // Navigate to create fragment to add new shelf
-            findNavController().navigate(R.id.action_homeFragment_to_createFragment)
+            // Navigate to AR fragment in create mode
+            val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = true)
+            findNavController().navigate(action)
         }
-
+        // My Location
         myLocationButton.setOnClickListener {
-            // Navigate to maps fragment to show current location
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
-
+        // Recent Shelves (no-op or show message)
         recentShelvesButton.setOnClickListener {
-            // Show recent shelves in current fragment
-            Toast.makeText(requireContext(), "Recent Shelves", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "No recent shelves", Toast.LENGTH_SHORT).show()
         }
-
-        // Navigation buttons
+        // AR Navigation
         arNavigationButton.setOnClickListener {
-            // Navigate to AR navigation fragment
-            findNavController().navigate(R.id.action_homeFragment_to_arFragment)
+            val action = HomeFragmentDirections.actionHomeFragmentToArFragment(createMode = false)
+            findNavController().navigate(action)
         }
-
+        // Map View
         mapViewButton.setOnClickListener {
-            // Navigate to maps fragment
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
-
+        // View All
         viewAllButton.setOnClickListener {
-            // Navigate to maps fragment to view all shelves
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
     }

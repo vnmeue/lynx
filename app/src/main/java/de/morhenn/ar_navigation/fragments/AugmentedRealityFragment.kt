@@ -181,6 +181,9 @@ class AugmentedRealityFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Read createMode argument
+        val createMode = arguments?.getBoolean("createMode") ?: false
+
         lifecycleScope.launchWhenCreated {
             loadModels()
         }
@@ -205,8 +208,7 @@ class AugmentedRealityFragment : Fragment() {
             FileLog.e(TAG, "Session failed with exception: $it")
         }
 
-        sceneView.lifecycle.addObserver(onArFrame = { arFrame ->
-
+        sceneView.onArFrame = { arFrame ->
             if (arFrame.isTrackingPlane && !isTracking) {
                 isTracking = true
                 binding.arExtendedFab.isEnabled = true
@@ -242,31 +244,39 @@ class AugmentedRealityFragment : Fragment() {
                 earth = sceneView.arSession?.earth
                 FileLog.d(TAG, "Earth object assigned")
             }
-        })
+        }
 
         initUI()
 
-        when (viewModel.navState) {
-            MainViewModel.NavState.MAPS_TO_AR_NAV -> {
-                sceneView.instructions.enabled = false
-                navOnly = true
-                updateState(AppState.RESOLVE_ABLE)
-            }
-            MainViewModel.NavState.MAPS_TO_AR_SEARCH -> {
-                isSearchingMode = true
-                updateState(AppState.SEARCHING)
-            }
-            MainViewModel.NavState.MAPS_TO_AR_NEW -> {
-                navOnly = false
-                updateState(AppState.PLACE_ANCHOR)
-            }
-            MainViewModel.NavState.CREATE_TO_AR_TO_TRY -> {
-                sceneView.instructions.enabled = false
-                navOnly = true
-                updateState(AppState.RESOLVE_ABLE)
-            }
-            else -> {
-                throw IllegalStateException("Invalid NavState in AugmentedRealityFragment: ${viewModel.navState}")
+        if (createMode) {
+            // Shelf creation mode: allow user to place arrows, name shelf, and save
+            navOnly = false
+            updateState(AppState.PLACE_ANCHOR)
+            // Optionally show a dialog or UI to name the shelf after placing the route
+        } else {
+            // Navigation/search modes (existing logic)
+            when (viewModel.navState) {
+                MainViewModel.NavState.MAPS_TO_AR_NAV -> {
+                    sceneView.instructions.enabled = false
+                    navOnly = true
+                    updateState(AppState.RESOLVE_ABLE)
+                }
+                MainViewModel.NavState.MAPS_TO_AR_SEARCH -> {
+                    isSearchingMode = true
+                    updateState(AppState.SEARCHING)
+                }
+                MainViewModel.NavState.MAPS_TO_AR_NEW -> {
+                    navOnly = false
+                    updateState(AppState.PLACE_ANCHOR)
+                }
+                MainViewModel.NavState.CREATE_TO_AR_TO_TRY -> {
+                    sceneView.instructions.enabled = false
+                    navOnly = true
+                    updateState(AppState.RESOLVE_ABLE)
+                }
+                else -> {
+                    throw IllegalStateException("Invalid NavState in AugmentedRealityFragment: ${viewModel.navState}")
+                }
             }
         }
     }
@@ -533,6 +543,45 @@ class AugmentedRealityFragment : Fragment() {
         }
     }
 
+    private fun showShelfNamingDialogAndSave() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_name_shelf, null)
+        val etShelfName = dialogView.findViewById<android.widget.EditText>(R.id.et_shelf_name)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+        dialogView.findViewById<android.widget.Button>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<android.widget.Button>(R.id.btn_save).setOnClickListener {
+            val shelfName = etShelfName.text.toString().trim()
+            if (shelfName.isEmpty()) {
+                etShelfName.error = "Please enter a name"
+                return@setOnClickListener
+            }
+            // Save shelf
+            saveNewShelf(shelfName)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun saveNewShelf(shelfName: String) {
+        val arRouteJson = arToJsonString()
+        val newPlace = de.morhenn.ar_navigation.persistance.NewPlace(
+            name = shelfName,
+            lat = geoLat,
+            lng = geoLng,
+            alt = geoAlt,
+            heading = geoHdg,
+            description = "",
+            author = "",
+            ardata = arRouteJson
+        )
+        de.morhenn.ar_navigation.persistance.PlaceRepository.getInstance().newPlace(newPlace)
+        // Navigate to Home and show a success message
+        findNavController().navigate(R.id.action_arFragment_to_homeFragment)
+        android.widget.Toast.makeText(requireContext(), "Shelf saved!", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     private fun onConfirm() {
         binding.arProgressBar.visibility = View.VISIBLE
         binding.arExtendedFab.isEnabled = false
@@ -545,6 +594,15 @@ class AugmentedRealityFragment : Fragment() {
                 it.lng = geoLng
                 it.heading = geoHdg
                 it.alt = geoAlt
+            }
+
+            if (arguments?.getBoolean("createMode") == true) {
+                // Show shelf naming dialog and save
+                withContext(Dispatchers.Main) {
+                    binding.arProgressBar.visibility = View.GONE
+                    showShelfNamingDialogAndSave()
+                }
+                return@launch
             }
 
             when (viewModel.navState) {

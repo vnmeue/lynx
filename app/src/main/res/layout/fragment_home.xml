@@ -401,8 +401,22 @@
                 android:id="@+id/rv_recent_shelves"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:overScrollMode="never"
-                android:nestedScrollingEnabled="false" />
+                android:scrollbars="none" />
+
+            <TextView
+                android:id="@+id/tv_no_recent_shelves"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No recent shelves yet. Add a new shelf to get started!"
+                android:textAlignment="center"
+                android:textColor="@color/text_secondary_light"
+                android:visibility="gone"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="16sp" />
 
             <!-- Quick Navigation Section -->
             <TextView

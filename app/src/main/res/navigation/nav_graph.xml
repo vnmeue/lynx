@@ -40,6 +40,10 @@
         android:id="@+id/arFragment"
         android:name="de.morhenn.ar_navigation.fragments.AugmentedRealityFragment"
         android:label="ArFragment">
+        <argument
+            android:name="createMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/action_arFragment_to_createFragment"
             app:destination="@id/createFragment"

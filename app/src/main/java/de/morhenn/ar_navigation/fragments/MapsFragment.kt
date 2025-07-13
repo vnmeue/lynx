@@ -82,17 +82,20 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
             } else {
                 viewModel.clearCurrentPlace()
                 viewModel.navState = MainViewModel.NavState.MAPS_TO_AR_NEW
-                findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToArFragment())
+                val action = MapsFragmentDirections.actionMapsFragmentToArFragment(createMode = true)
+                findNavController().navigate(action)
             }
         }
         binding.mapRouteFab.setOnClickListener {
             viewModel.updateCurrentPlace(selectedMarker!!)
             viewModel.navState = MainViewModel.NavState.MAPS_TO_AR_NAV
-            findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToArFragment())
+            val action = MapsFragmentDirections.actionMapsFragmentToArFragment(createMode = false)
+            findNavController().navigate(action)
         }
         binding.mapArSearchFab.setOnClickListener {
             viewModel.navState = MainViewModel.NavState.MAPS_TO_AR_SEARCH
-            findNavController().navigate(MapsFragmentDirections.actionMapsFragmentToArFragment())
+            val action = MapsFragmentDirections.actionMapsFragmentToArFragment(createMode = false)
+            findNavController().navigate(action)
         }
         binding.mapMyLocationFab.setImageResource(R.drawable.ic_baseline_gps_not_fixed_24)
         binding.mapMyLocationFab.setOnClickListener { zoomOnMyLocation() }

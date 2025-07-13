@@ -105,14 +105,16 @@ class CreateFragment : Fragment(), OnMapReadyCallback {
             if (viewModel.arDataString.isNotBlank()) {
                 viewModel.arDataString = ""
             }
-            findNavController().navigate(CreateFragmentDirections.actionCreateFragmentToArFragment())
+            val action = CreateFragmentDirections.actionCreateFragmentToArFragment(createMode = false)
+            findNavController().navigate(action)
         }
         binding.buttonTryArRoute.setOnClickListener {
             viewModel.navState = MainViewModel.NavState.CREATE_TO_AR_TO_TRY
             editPlace?.let {
                 viewModel.currentPlace = it
             }
-            findNavController().navigate(CreateFragmentDirections.actionCreateFragmentToArFragment())
+            val action = CreateFragmentDirections.actionCreateFragmentToArFragment(createMode = false)
+            findNavController().navigate(action)
         }
 
         binding.buttonCreate.setOnClickListener {
