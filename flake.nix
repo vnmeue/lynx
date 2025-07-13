@@ -1,5 +1,5 @@
 {
-  description = "My Android project";
+  description = "lynx project nix flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -53,6 +53,7 @@
         } // lib.optionalAttrs (system == "x86_64-linux") {
           # Android Studio in nixpkgs is currently packaged for x86_64-linux only.
           android-studio = pkgs.androidStudioPackages.stable;
+
           # android-studio = pkgs.androidStudioPackages.beta;
           # android-studio = pkgs.androidStudioPackages.preview;
           # android-studio = pkgs.androidStudioPackage.canary;
