@@ -180,6 +180,8 @@ class AugmentedRealityFragment : Fragment() {
 
     private var initialShelfName: String? = null
 
+    private var isMindMapMode = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAugmentedRealityBinding.inflate(inflater, container, false)
         return binding.root
@@ -232,6 +234,9 @@ class AugmentedRealityFragment : Fragment() {
                     placementNode = ArModelNode(placementMode = PlacementMode.PLANE_HORIZONTAL).apply {
                         parent = sceneView
                         isVisible = true
+                    }
+                    if (!isMindMapMode) {
+                        binding.arButtonStart.visibility = View.VISIBLE
                     }
                 }
             }
@@ -340,6 +345,109 @@ class AugmentedRealityFragment : Fragment() {
                 Toast.makeText(requireContext(), "Press Start to begin recording", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Add at least one step before saving", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.arButtonStart.setOnClickListener {
+            isMindMapMode = true
+            binding.arButtonStart.visibility = View.GONE
+            binding.arFabLayout.visibility = View.VISIBLE
+            binding.arButtonFinish.visibility = View.VISIBLE
+            Toast.makeText(requireContext(), "Mind map mode started! Move and add nodes.", Toast.LENGTH_SHORT).show()
+        }
+        // Enable FabOptions for mind map node placement
+        binding.arFabArrowForward.setOnClickListener {
+            if (isMindMapMode) addMindMapNode(ModelName.ARROW_FORWARD)
+        }
+        binding.arFabArrowLeft.setOnClickListener {
+            if (isMindMapMode) addMindMapNode(ModelName.ARROW_LEFT)
+        }
+        binding.arFabArrowRight.setOnClickListener {
+            if (isMindMapMode) addMindMapNode(ModelName.ARROW_RIGHT)
+        }
+        binding.arFabTarget.setOnClickListener {
+            if (isMindMapMode) addMindMapNode(ModelName.TARGET)
+        }
+        binding.arExtendedFab.setOnClickListener {
+            when (appState) {
+                AppState.TARGET_PLACED -> onConfirm()
+                AppState.RESOLVE_ABLE -> onResolve()
+                AppState.RESOLVE_FAIL -> onResolve()
+                AppState.SEARCHING -> onResolve()
+                AppState.PLACE_ANCHOR -> onPlace()
+                AppState.PLACE_OBJECT -> onPlace()
+                AppState.PLACE_TARGET -> onPlace()
+                else -> {
+                    FileLog.e(TAG, "Extended fab clicked in not allowed state: $appState")
+                }
+            }
+        }
+        binding.arButtonUndo.setOnClickListener {
+            if (resolvedFromSearchMode) {
+                resolvedFromSearchMode = false
+                anchorNode?.destroy()
+                isSearchingMode = true
+                nodeList.forEach {
+                    it.parent = null
+                }
+                nodeList.clear()
+                pointList.clear()
+                with(binding) {
+                    arButtonUndo.visibility = View.GONE
+                    arExtendedFab.isEnabled = true
+                }
+                firstSearchFetched = false
+                observing = false
+                viewModel.fetchPlacesAroundLastLocation(SEARCH_RADIUS)
+                updateState(AppState.SEARCHING)
+            } else if (pointList.size == 0) {
+                clear()
+            } else if (pointList.size > 0) {
+                if ((appState == AppState.PLACE_TARGET || appState == AppState.PLACE_OBJECT) && pointList.last().modelName == TARGET) {
+                    updateState(AppState.TARGET_PLACED)
+                } else {
+                    pointList.removeLast()
+                    nodeList.removeLast().let {
+                        if (findModelName(it.model) == TARGET) {
+                            updateState(AppState.PLACE_TARGET)
+                        }
+                        it.parent = null
+                    }
+                    adapter.notifyItemRemoved(pointList.lastIndex + 1)
+                }
+            }
+        }
+        binding.arButtonClear.setOnClickListener {
+            clear()
+        }
+        //toggle occlusion - testing only
+        binding.arInfoText.setOnLongClickListener {
+            sceneView.arCameraStream.isDepthOcclusionEnabled = !sceneView.arCameraStream.isDepthOcclusionEnabled
+            true
+        }
+        binding.arModelSizeToggle.addOnButtonCheckedListener { _, checkedId, _ ->
+            when (checkedId) {
+                R.id.ar_model_icon_s -> {
+                    scale = 1f
+                }
+                R.id.ar_model_icon_m -> {
+                    scale = 1.5f
+                }
+                R.id.ar_model_icon_l -> {
+                    scale = 2f
+                }
+            }
+            placementNode?.modelScale = Scale(scale, scale, scale)
+        }
+        // In onViewCreated, after setting up mind map mode:
+        binding.arButtonFinish.setOnClickListener {
+            if (isMindMapMode && pointList.isNotEmpty()) {
+                isMindMapMode = false
+                binding.arFabLayout.visibility = View.GONE
+                binding.arButtonFinish.visibility = View.GONE
+                // Prompt for shelf name and save
+                showShelfNamingDialogAndSave()
+            } else {
+                Toast.makeText(requireContext(), "Add at least one node before finishing.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -785,7 +893,7 @@ class AugmentedRealityFragment : Fragment() {
                                 parent = anchorNode //Set the anchor to the cloudAnchor
                                 val pos = anchorNode.localToWorldPosition(it.position.toVector3())
                                 position = Position(pos.x, pos.y, pos.z)
-                                scale = Scale(it.scale, it.scale, it.scale)
+                                modelScale = Scale(it.scale, it.scale, it.scale)
                                 rotation = it.rotation
                                 setModel(modelMap[it.modelName])
                                 addNode(this)
@@ -1169,9 +1277,16 @@ class AugmentedRealityFragment : Fragment() {
 
     private fun addNode(node: ArModelNode) {
         nodeList.add(node)
-        pointList.add(ArPoint(node.position, node.rotation, findModelName(node.model), scale))
+        // Ensure only a Float is passed for scale, not Scale or modelScale
+        pointList.add(
+            ArPoint(
+                node.position,
+                Rotation(node.rotation.x, node.rotation.y, node.rotation.z),
+                findModelName(node.model),
+                this@AugmentedRealityFragment.scale // Always a Float
+            )
+        )
         adapter.notifyItemInserted(adapter.itemCount)
-
     }
 
     private fun clear() {
@@ -1413,5 +1528,28 @@ class AugmentedRealityFragment : Fragment() {
         sceneView.onDestroy(this)
         _binding = null
         super.onDestroy()
+    }
+
+    // Add this function to handle node placement
+    private fun addMindMapNode(model: ModelName) {
+        // Place a node at the current camera position/direction
+        val cameraPose = sceneView.currentFrame?.camera?.pose
+        if (cameraPose == null) {
+            Toast.makeText(requireContext(), "Camera pose unavailable", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val position = Position(cameraPose.tx(), cameraPose.ty(), cameraPose.tz())
+        // Use the forward vector (z axis) as rotation
+        val zAxis = cameraPose.getZAxis()
+        val rotation = Rotation(zAxis[0], zAxis[1], zAxis[2])
+        val node = ArModelNode(PlacementMode.DISABLED).apply {
+            parent = anchorNode ?: sceneView
+            this.position = position
+            // For node orientation, you may want to use quaternion, but for ArPoint, use Rotation
+            setModel(modelMap[model])
+            modelScale = Scale(this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale)
+        }
+        addNode(node)
+        Toast.makeText(requireContext(), "${model.name} node added", Toast.LENGTH_SHORT).show()
     }
 }
