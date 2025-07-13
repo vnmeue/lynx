@@ -2,15 +2,22 @@
     <!-- Base application theme. -->
     <style name="Theme.ARNavigation" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#2C02EE</item>
-        <item name="colorPrimaryVariant">#5916FC</item>
+        <item name="colorPrimary">@color/walmart_blue</item>
+        <item name="colorPrimaryVariant">@color/walmart_blue_dark</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">#C3EE02</item>
-        <item name="colorSecondaryVariant">#d6f56a</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorSecondary">@color/walmart_orange</item>
+        <item name="colorSecondaryVariant">@color/walmart_orange</item>
+        <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/walmart_blue</item>
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorOnSurface">@color/text_primary_light</item>
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

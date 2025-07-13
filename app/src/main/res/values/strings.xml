@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AR-Navigation</string>
+    <string name="app_name">Lynx Navigator</string>
     <string name="fab_add_descr">FAB to add a place</string>
     <string name="fab_route_descr">FAB to launch maps route</string>
     <string name="fab_my_location_descr">"FAB Find my location "</string>
@@ -35,4 +35,23 @@
     <string name="btn_confirm">CONFIRM</string>
     <string name="btn_resolve">RESOLVE</string>
     <string name="btn_hosting">HOSTING</string>
+    
+    <!-- Launch Fragment Strings -->
+    <string name="launch_title">Lynx Navigator</string>
+    <string name="launch_subtitle">Navigate to shelves with AR</string>
+    <string name="search_hint">Search shelves, departments, or items...</string>
+    <string name="permission_required_title">Location Permission Required</string>
+    <string name="permission_required_message">This app needs location access to help you navigate to shelves in the store.</string>
+    <string name="btn_grant_permission">Grant Permission</string>
+    <string name="btn_select_shelf">Browse Shelves</string>
+    <string name="btn_add_new_shelf">Add New Shelf</string>
+    <string name="btn_set_location">Set Location</string>
+    <string name="btn_quick_nav">Quick Navigation</string>
+    <string name="btn_create_point">Create Point</string>
+    <string name="btn_view_places">View Places</string>
+    <string name="btn_recent_shelves">Recent Shelves</string>
+    <string name="btn_all_shelves">All Shelves</string>
+    <string name="btn_my_location">My Location</string>
+    <string name="testing_section">Testing</string>
+    <string name="btn_test_mode">Test Mode</string>
 </resources>
