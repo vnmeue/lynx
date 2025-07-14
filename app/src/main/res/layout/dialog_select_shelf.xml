@@ -1,90 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/card_background_dark"
-    android:padding="24dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select Shelf to Navigate"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_primary_dark"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="24dp" />
+    android:background="@drawable/rounded_top_corners_dialog">
 
     <LinearLayout
-        android:id="@+id/option_electronics"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/rounded_corners_highlighted"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_explore_24"
-            android:tint="@color/accent_blue"
-            android:contentDescription="Electronics Icon" />
+        android:orientation="vertical"
+        android:paddingTop="32dp"
+        android:paddingBottom="24dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Electronics Shelf"
-            android:textSize="16sp"
+            android:text="Select Shelf to Navigate"
+            android:textSize="20sp"
+            android:textStyle="bold"
             android:textColor="@color/text_primary_dark"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp" />
-    </LinearLayout>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp" />
 
-    <LinearLayout
-        android:id="@+id/option_grocery"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/rounded_corners_highlighted"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_add_location_alt_24"
-            android:tint="@color/walmart_orange"
-            android:contentDescription="Grocery Icon" />
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Electronics Option -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/option_electronics"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Grocery Shelf"
-            android:textSize="16sp"
-            android:textColor="@color/text_primary_dark"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp" />
-    </LinearLayout>
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@color/accent_blue"
+            app:strokeWidth="2dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/surface_dark">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_corners"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:layout_gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_baseline_explore_24"
+                        android:tint="@color/accent_blue"
+                        android:contentDescription="Electronics Icon" />
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Electronics Shelf"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary_dark"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    <LinearLayout
-        android:id="@+id/option_clothes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/rounded_corners_highlighted"
-        android:padding="16dp">
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_person_24"
-            android:tint="@color/accent_blue"
-            android:contentDescription="Clothes Icon" />
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Grocery Option -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/option_grocery"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clothes Shelf"
-            android:textSize="16sp"
-            android:textColor="@color/text_primary_dark"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp" />
-    </LinearLayout>
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@color/walmart_orange"
+            app:strokeWidth="2dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/surface_dark">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_corners"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:layout_gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_baseline_add_location_alt_24"
+                        android:tint="@color/walmart_orange"
+                        android:contentDescription="Grocery Icon" />
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Grocery Shelf"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary_dark"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout> 
+        <!-- Clothes Option -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/option_clothes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@color/accent_blue"
+            app:strokeWidth="2dp"
+            android:backgroundTint="@color/surface_dark">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_corners"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:layout_gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_baseline_person_24"
+                        android:tint="@color/accent_blue"
+                        android:contentDescription="Clothes Icon" />
+                </FrameLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clothes Shelf"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary_dark"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</FrameLayout> 

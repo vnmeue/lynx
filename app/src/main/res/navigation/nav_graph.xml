@@ -5,6 +5,14 @@
     app:startDestination="@id/homeFragment">
     
     <fragment
+        android:id="@+id/shoppingListResultFragment"
+        android:name="de.morhenn.ar_navigation.fragments.ShoppingListResultFragment"
+        android:label="ShoppingListResultFragment">
+        <argument
+            android:name="shopping_list_json"
+            app:argType="string" />
+    </fragment>
+    <fragment
         android:id="@+id/homeFragment"
         android:name="de.morhenn.ar_navigation.fragments.HomeFragment"
         android:label="HomeFragment">
@@ -17,6 +25,9 @@
         <action
             android:id="@+id/action_homeFragment_to_arFragment"
             app:destination="@id/arFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_shoppingListResultFragment"
+            app:destination="@id/shoppingListResultFragment" />
     </fragment>
     
     <fragment
@@ -48,6 +59,11 @@
             android:name="shelfName"
             app:argType="string"
             android:defaultValue="" />
+        <argument
+            android:name="arDirections"
+            app:argType="string"
+            android:defaultValue=""
+        />
         <action
             android:id="@+id/action_arFragment_to_createFragment"
             app:destination="@id/createFragment"

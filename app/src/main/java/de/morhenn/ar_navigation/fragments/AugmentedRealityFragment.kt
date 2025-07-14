@@ -181,6 +181,10 @@ class AugmentedRealityFragment : Fragment() {
     private var initialShelfName: String? = null
 
     private var isMindMapMode = false
+    private var arDirectionsArg: String? = null
+
+    private var shouldRenderNavSteps = false
+    private var navStepsAnchorPosition: Position? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAugmentedRealityBinding.inflate(inflater, container, false)
@@ -190,9 +194,11 @@ class AugmentedRealityFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Read createMode and shelfName arguments
+        // Read createMode, navOnly, and shelfName arguments
         val createMode = arguments?.getBoolean("createMode") ?: false
+        val navOnlyArg = arguments?.getBoolean("navOnly") ?: false
         initialShelfName = arguments?.getString("shelfName")
+        val directionsArgLocal = arguments?.getString("arDirections")
 
         lifecycleScope.launchWhenCreated {
             loadModels()
@@ -228,6 +234,16 @@ class AugmentedRealityFragment : Fragment() {
                 isTracking = true
                 binding.arExtendedFab.isEnabled = true
                 Toast.makeText(requireContext(), "Plane tracked, AR ready", Toast.LENGTH_SHORT).show()
+                if (shouldRenderNavSteps && navStepsAnchorPosition == null) {
+                    // Use camera position and facing as anchor and initial direction
+                    val cameraPose = arFrame.camera.pose
+                    navStepsAnchorPosition = Position(cameraPose.tx(), 0.01f, cameraPose.tz())
+                    val cameraForwardX = -cameraPose.zAxis[0].toFloat()
+                    val cameraForwardZ = -cameraPose.zAxis[2].toFloat()
+                    val yaw = kotlin.math.atan2(cameraForwardX, cameraForwardZ)
+                    renderNavStepsInAR(navStepsAnchorPosition!!, yaw)
+                    shouldRenderNavSteps = false
+                }
                 if (!navOnly && !isSearchingMode) {
                     anchorCircle = AnchorHostingPoint(requireContext(), Filament.engine, sceneView.renderer.filamentScene)
                     anchorCircle.enabled = true
@@ -270,6 +286,29 @@ class AugmentedRealityFragment : Fragment() {
 
         initUI()
 
+        // Special hardcoded navigation mode: camera open, arrows shown, no editing
+        if (createMode && navOnlyArg && !directionsArgLocal.isNullOrEmpty()) {
+            navOnly = true
+            navSteps.clear()
+            val steps = directionsArgLocal.split(",").mapNotNull {
+                when (it.trim().uppercase()) {
+                    "STRAIGHT", "FORWARD" -> NavStep.FORWARD
+                    "LEFT" -> NavStep.LEFT
+                    "RIGHT" -> NavStep.RIGHT
+                    else -> null
+                }
+            }
+            navSteps.addAll(steps)
+            // Hide all editing/recording UI
+            binding.arFabLayout.visibility = View.GONE
+            binding.arButtonStart.visibility = View.GONE
+            binding.arButtonFinish.visibility = View.GONE
+            // Wait for plane tracking, then render arrows from anchor
+            shouldRenderNavSteps = true
+            Toast.makeText(requireContext(), "Move your phone to track a surface, then follow the arrows!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (createMode) {
             // Shelf creation mode: allow user to place arrows, name shelf, and save
             navOnly = false
@@ -300,6 +339,33 @@ class AugmentedRealityFragment : Fragment() {
                     throw IllegalStateException("Invalid NavState in AugmentedRealityFragment: ${viewModel.navState}")
                 }
             }
+        }
+        if (!createMode && (directionsArgLocal == null || directionsArgLocal.isEmpty())) {
+            Toast.makeText(requireContext(), "No navigation directions available for this shelf.", Toast.LENGTH_LONG).show()
+            findNavController().popBackStack()
+            return
+        }
+        if (!createMode && !directionsArgLocal.isNullOrEmpty()) {
+            // If arDirections is provided, set navOnly and populate navSteps
+            navOnly = true
+            navSteps.clear()
+            try {
+                val steps = directionsArgLocal.split(",").mapNotNull {
+                    when (it.trim().uppercase()) {
+                        "STRAIGHT", "FORWARD" -> NavStep.FORWARD
+                        "LEFT" -> NavStep.LEFT
+                        "RIGHT" -> NavStep.RIGHT
+                        else -> null
+                    }
+                }
+                navSteps.addAll(steps)
+                Toast.makeText(requireContext(), "Loaded navSteps: ${navSteps.joinToString()}", Toast.LENGTH_LONG).show()
+                Log.d(TAG, "Loaded navSteps: ${navSteps.joinToString()}")
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error loading navigation steps: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "Error loading navigation steps", e)
+            }
+            // Optionally, trigger AR navigation UI update here if needed
         }
         setNavRecordControls("idle")
         // Navigation recording controls
@@ -1629,5 +1695,43 @@ class AugmentedRealityFragment : Fragment() {
             z = 0f
         }
         return Rotation(x, y, z)
+    }
+
+    private fun renderNavStepsInAR(startPosition: Position, initialRotation: Float) {
+        // Remove any existing nodes/arrows
+        nodeList.forEach { it.parent = null }
+        nodeList.clear()
+        var currentPosition = startPosition
+        var currentRotation = initialRotation // Yaw in radians
+        navSteps.forEach { step ->
+            val model = when (step) {
+                NavStep.FORWARD -> modelMap[ModelName.ARROW_FORWARD]
+                NavStep.LEFT -> modelMap[ModelName.ARROW_LEFT]
+                NavStep.RIGHT -> modelMap[ModelName.ARROW_RIGHT]
+            }
+            val node = ArModelNode(PlacementMode.DISABLED).apply {
+                parent = sceneView
+                position = currentPosition
+                rotation = Rotation(0f, currentRotation, 0f)
+                setModel(model)
+                modelScale = Scale(this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale, this@AugmentedRealityFragment.scale)
+            }
+            nodeList.add(node)
+            // Move position for next arrow
+            when (step) {
+                NavStep.FORWARD -> {
+                    // Move forward in Z (relative to current rotation)
+                    val dz = 1.0f * kotlin.math.cos(currentRotation)
+                    val dx = 1.0f * kotlin.math.sin(currentRotation)
+                    currentPosition = Position(currentPosition.x + dx, 0.01f, currentPosition.z + dz)
+                }
+                NavStep.LEFT -> {
+                    currentRotation += (-Math.PI / 2).toFloat()
+                }
+                NavStep.RIGHT -> {
+                    currentRotation += (Math.PI / 2).toFloat()
+                }
+            }
+        }
     }
 }
