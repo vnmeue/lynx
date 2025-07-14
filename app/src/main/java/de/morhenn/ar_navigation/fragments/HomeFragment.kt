@@ -60,6 +60,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewAllButton: ImageView
     private lateinit var billToShelvesButton: MaterialButton
     private lateinit var listToShelvesButton: MaterialButton
+    private lateinit var gpsButton: MaterialButton
     private var photoUri: Uri? = null
     private lateinit var takePictureLauncher: androidx.activity.result.ActivityResultLauncher<Uri>
 
@@ -71,6 +72,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var userLatLng: LatLng? = null
     // Buffer for last received shopping list
     private var lastShoppingListJson: String? = null
+    private var showAllShelvesOnMap = false
 
     // Hardcoded AR directions for demo shelves
     data class ShelfWithDirections(val name: String, val description: String, val directions: List<Direction>)
@@ -106,6 +108,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         viewAllButton = view.findViewById(R.id.btn_view_all)
         billToShelvesButton = view.findViewById(R.id.btn_list_to_shelves)
         listToShelvesButton = view.findViewById(R.id.btn_list_to_shelves)
+        gpsButton = view.findViewById(R.id.btn_center_map)
 
         setupRecyclerView()
         setupClickListeners()
@@ -351,9 +354,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupClickListeners() {
-        // Go to Shelf
+        // Go to Shelf now toggles all shelf markers
         browseShelvesButton.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
+            showAllShelvesOnMap = !showAllShelvesOnMap
+            mapPreview?.let { map ->
+                if (showAllShelvesOnMap) {
+                    showAllHardcodedShelvesOnMap(map)
+                } else {
+                    showHardcodedShelvesOnMap(map)
+                }
+            }
+        }
+        // GPS button now centers map on user location
+        gpsButton.setOnClickListener {
+            if (userLatLng != null && mapPreview != null) {
+                mapPreview?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng!!, 17f))
+            } else {
+                Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show()
+            }
         }
         // New Shelf Add
         addShelfButton.setOnClickListener {
@@ -431,16 +449,32 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         viewAllButton.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_mapsFragment)
         }
-        // Center Map on My Location (GPS Button)
-        view?.findViewById<MaterialButton>(R.id.btn_center_map)?.setOnClickListener {
-            if (userLatLng != null && mapPreview != null) {
-                mapPreview?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng!!, 17f))
-            } else {
-                Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show()
-            }
-        }
         listToShelvesButton.setOnClickListener {
             launchCamera()
+        }
+    }
+
+    // Add this helper to show all hardcoded shelves
+    private fun showAllHardcodedShelvesOnMap(googleMap: GoogleMap) {
+        googleMap.clear()
+        val user = userLatLng
+        if (user != null) {
+            // Show user marker
+            googleMap.addMarker(MarkerOptions().position(user).title("You").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)))
+            // Place all shelves at least 40m apart
+            val electronics = GeoUtils.getLatLngByDistanceAndBearing(user.latitude, user.longitude, 0.0, 0.00040) // ~40m north
+            val grocery = GeoUtils.getLatLngByDistanceAndBearing(user.latitude, user.longitude, 90.0, 0.00080) // ~80m east
+            val clothes = GeoUtils.getLatLngByDistanceAndBearing(user.latitude, user.longitude, 210.0, 0.00120) // ~120m southwest
+            val shelves = listOf(
+                Triple(electronics, "Electronics Shelf", BitmapDescriptorFactory.HUE_BLUE),
+                Triple(grocery, "Grocery Shelf", BitmapDescriptorFactory.HUE_GREEN),
+                Triple(clothes, "Clothes Shelf", BitmapDescriptorFactory.HUE_ORANGE)
+            )
+            for (shelf in shelves) {
+                googleMap.addMarker(
+                    MarkerOptions().position(shelf.first).title(shelf.second).icon(BitmapDescriptorFactory.defaultMarker(shelf.third))
+                )
+            }
         }
     }
 

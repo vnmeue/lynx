@@ -38,27 +38,30 @@ class ShoppingListResultFragment : Fragment() {
                         item.setPadding(16, 2, 0, 2)
                         containerCategories.addView(item)
                     }
-                    // Add AR navigation button for this category
-                    val navBtn = MaterialButton(requireContext())
-                    navBtn.text = "Navigate with AR"
-                    navBtn.setIconResource(R.drawable.ic_baseline_view_in_ar_24)
-                    navBtn.iconPadding = 16
-                    navBtn.setOnClickListener {
-                        // Launch AR navigation with hardcoded directions for this category
-                        val directions = when (cat.lowercase()) {
-                            "electronics" -> "STRAIGHT,STRAIGHT,LEFT"
-                            "groceries", "grocery" -> "STRAIGHT,STRAIGHT,RIGHT"
-                            "clothes" -> "STRAIGHT,STRAIGHT,STRAIGHT"
-                            else -> ""
+                    // Add AR navigation button for this category only if not (No items)
+                    val items = json.optString(cat)
+                    if (items != null && items != "(No items)") {
+                        val navBtn = MaterialButton(requireContext())
+                        navBtn.text = "Navigate with AR"
+                        navBtn.setIconResource(R.drawable.ic_baseline_view_in_ar_24)
+                        navBtn.iconPadding = 16
+                        navBtn.setOnClickListener {
+                            // Launch AR navigation with hardcoded directions for this category
+                            val directions = when (cat.lowercase()) {
+                                "electronics" -> "STRAIGHT,STRAIGHT,LEFT"
+                                "groceries", "grocery" -> "STRAIGHT,STRAIGHT,RIGHT"
+                                "clothes" -> "STRAIGHT,STRAIGHT,STRAIGHT"
+                                else -> ""
+                            }
+                            findNavController().navigate(R.id.arFragment, Bundle().apply {
+                                putBoolean("createMode", true)
+                                putBoolean("navOnly", true)
+                                putString("shelfName", cat.replaceFirstChar { it.uppercase() })
+                                putString("arDirections", directions)
+                            })
                         }
-                        findNavController().navigate(R.id.arFragment, Bundle().apply {
-                            putBoolean("createMode", true)
-                            putBoolean("navOnly", true)
-                            putString("shelfName", cat.replaceFirstChar { it.uppercase() })
-                            putString("arDirections", directions)
-                        })
+                        containerCategories.addView(navBtn)
                     }
-                    containerCategories.addView(navBtn)
                 }
             }
             if (json.has("not_available")) {
